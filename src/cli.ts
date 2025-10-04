@@ -1,7 +1,11 @@
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
+import { createRequire } from "node:module";
 import { mergeJsonc, type MergeOptions } from "./core.js";
 import { loadConfig, type ConfigOptions } from "./config.js";
+
+const require = createRequire(import.meta.url);
+const { version } = require("../package.json") as { version: string };
 
 interface ParsedArgs {
   out?: string;
@@ -85,7 +89,7 @@ async function run() {
       })
       .help("help")
       .alias("help", "h")
-      .version("0.1.0")
+      .version(version)
       .alias("version", "v")
       .demandCommand(1, "You must provide at least one input file")
       .example(
