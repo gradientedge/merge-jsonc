@@ -59,15 +59,15 @@ Options:
 ### Programmatic API
 
 ```typescript
-import { mergeJsonc } from '@gradientedge/merge-jsonc';
+import { mergeJsonc } from "@gradientedge/merge-jsonc";
 
 const result = mergeJsonc({
-  inputs: ['base.json', 'dev.jsonc', 'local.json5'],
-  out: 'config.json',
-  skipMissing: true
+  inputs: ["base.json", "dev.jsonc", "local.json5"],
+  out: "config.json",
+  skipMissing: true,
 });
 
-console.log(result.wrote ? 'Merged!' : result.reason);
+console.log(result.wrote ? "Merged!" : result.reason);
 ```
 
 ---
@@ -77,7 +77,7 @@ console.log(result.wrote ? 'Merged!' : result.reason);
 See the [`examples/`](./examples/) directory for real-world usage patterns:
 
 - **Vite Config**: Layer base, dev, and local Vite configurations
-- **Wrangler Config**: Merge Cloudflare Workers configurations  
+- **Wrangler Config**: Merge Cloudflare Workers configurations
 - **JSON5 Features**: Demonstrate JSON5 syntax with comments and trailing commas
 
 ---
