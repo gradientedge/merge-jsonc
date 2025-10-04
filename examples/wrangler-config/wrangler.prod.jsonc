@@ -1,0 +1,27 @@
+{
+  // Production environment configuration
+  "name": "my-worker-prod",
+  "vars": {
+    "ENVIRONMENT": "production",
+    "API_URL": "https://api.example.com",
+    "DEBUG": "false"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "CACHE",
+      "id": "prod-cache-namespace-id"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "STORAGE",
+      "bucket_name": "prod-storage-bucket"
+    }
+  ],
+  "routes": [
+    {
+      "pattern": "example.com/*",
+      "zone_name": "example.com"
+    }
+  ]
+}

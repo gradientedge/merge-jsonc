@@ -1,0 +1,53 @@
+{
+  "name": "@gradientedge/merge-jsonc",
+  "version": "0.1.0",
+  "description": "Secure JSON/JSONC deep-merger CLI for Node 22+, with mtime fast-path and no-op writes.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "merge-jsonc": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./cli": {
+      "import": "./dist/cli.js"
+    }
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "prepublishOnly": "npm run format:check && npm run lint && npm run test && npm run build"
+  },
+  "dependencies": {
+    "@types/yargs": "^17.0.33",
+    "deepmerge": "^4.3.1",
+    "jsonc-parser": "^3.3.1",
+    "yargs": "^18.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.37.0",
+    "@types/node": "^22.7.5",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
+    "@typescript-eslint/parser": "^8.45.0",
+    "eslint": "^9.11.1",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
+    "tsup": "^8.2.4",
+    "typescript": "^5.6.2",
+    "vitest": "^3.2.4"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false
+}

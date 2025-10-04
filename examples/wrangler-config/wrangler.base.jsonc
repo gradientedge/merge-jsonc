@@ -1,0 +1,22 @@
+{
+  // Base Wrangler configuration
+  "name": "my-worker",
+  "main": "src/index.js",
+  "compatibility_date": "2024-10-04",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "ENVIRONMENT": "base"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "CACHE",
+      "preview_id": "preview-cache-id"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "STORAGE",
+      "preview_bucket_name": "preview-storage"
+    }
+  ]
+}

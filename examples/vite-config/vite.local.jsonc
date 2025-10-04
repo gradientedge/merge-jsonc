@@ -1,0 +1,11 @@
+{
+  // Local developer customizations
+  "server": {
+    "port": 4000,
+    "open": true
+  },
+  "define": {
+    "__DEVELOPER_NAME__": "\"John Doe\"",
+    "__LOCAL_API__": "\"http://localhost:9000/api\""
+  }
+}

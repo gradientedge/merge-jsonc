@@ -1,0 +1,19 @@
+{
+  // Base Vite configuration - shared across all environments
+  "base": "/",
+  "publicDir": "public",
+  "build": {
+    "outDir": "dist",
+    "sourcemap": false,
+    "minify": "terser",
+    "target": "es2020"
+  },
+  "server": {
+    "port": 3000,
+    "strictPort": false
+  },
+  "define": {
+    "__APP_VERSION__": "\"1.0.0\""
+  },
+  "plugins": ["react"]
+}

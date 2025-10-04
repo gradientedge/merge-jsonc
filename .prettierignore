@@ -1,0 +1,11 @@
+# Build outputs
+dist/
+node_modules/
+
+# Generated files
+*.log
+*.tgz
+*.bak
+
+# Test temporary directories
+test-tmp*/
