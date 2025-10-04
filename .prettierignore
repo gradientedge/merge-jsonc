@@ -9,3 +9,6 @@ node_modules/
 
 # Test temporary directories
 test-tmp*/
+
+# Lockfile
+package-lock.json
