@@ -1,0 +1,10 @@
+# Code Owners for @gradientedge/merge-jsonc
+
+#
+
+# This file defines who needs to review pull requests for specific files or directories.
+
+# Learn more: https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners
+
+# Global ownership - all files require review from maintainers team
+* @gradientedge/maintainers
