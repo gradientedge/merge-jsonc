@@ -3,6 +3,18 @@
   "version": "0.1.0",
   "description": "JSON/JSONC/JSON5 deep-merger CLI for Node 22+",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gradientedge/merge-jsonc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gradientedge/merge-jsonc/issues"
+  },
+  "homepage": "https://github.com/gradientedge/merge-jsonc#readme",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
   "type": "module",
   "bin": {
     "merge-jsonc": "./dist/cli.js"
