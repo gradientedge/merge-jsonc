@@ -12,16 +12,7 @@
     "url": "https://github.com/gradientedge/merge-jsonc/issues"
   },
   "homepage": "https://github.com/gradientedge/merge-jsonc#readme",
-  "keywords": [
-    "json",
-    "jsonc",
-    "json5",
-    "merge",
-    "cli",
-    "config",
-    "configuration",
-    "deep-merge"
-  ],
+  "keywords": ["json", "jsonc", "json5", "merge", "cli", "config", "configuration", "deep-merge"],
   "publishConfig": {
     "access": "public"
   },
