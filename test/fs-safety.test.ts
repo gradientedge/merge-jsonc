@@ -50,6 +50,10 @@ describe("fs-safety utilities", () => {
       expect(() => ensureJsonLike("file.jsonc")).not.toThrow();
     });
 
+    test("should allow .json5 files", () => {
+      expect(() => ensureJsonLike("file.json5")).not.toThrow();
+    });
+
     test("should reject other extensions", () => {
       expect(() => ensureJsonLike("file.txt")).toThrow();
       expect(() => ensureJsonLike("file.js")).toThrow();
@@ -83,7 +87,7 @@ describe("fs-safety utilities", () => {
     test("should reject non-JSON files", () => {
       expect(() => {
         safeInputPath("test.txt", { optional: true });
-      }).toThrow("Only .json or .jsonc files are allowed");
+      }).toThrow("Only .json, .jsonc, or .json5 files are allowed");
     });
   });
 

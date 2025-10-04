@@ -34,8 +34,8 @@ export function ensureInsideRoot(p: string) {
 
 export function ensureJsonLike(pathStr: string) {
   const ext = extname(pathStr).toLowerCase();
-  if (ext !== ".json" && ext !== ".jsonc") {
-    throw new Error(`Only .json or .jsonc files are allowed: '${pathStr}'`);
+  if (ext !== ".json" && ext !== ".jsonc" && ext !== ".json5") {
+    throw new Error(`Only .json, .jsonc, or .json5 files are allowed: '${pathStr}'`);
   }
 }
 

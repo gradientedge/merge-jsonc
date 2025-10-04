@@ -1,0 +1,39 @@
+{
+  // Base application configuration
+  name: "my-awesome-app",
+  version: "1.0.0",
+  author: "Developer Team",
+
+  // Server configuration
+  server: {
+    port: 8080,
+    host: "localhost",
+    ssl: false,
+  },
+
+  // Database settings
+  database: {
+    type: "postgresql",
+    host: "localhost",
+    port: 5432,
+    name: "myapp_db",
+    // Connection pool configuration
+    pool: {
+      min: 2,
+      max: 10,
+      idleTimeoutMillis: 30000,
+    }, // trailing comma is fine in JSON5
+  },
+
+  // Feature flags
+  features: {
+    authentication: true,
+    analytics: false,
+    caching: true,
+    // Experimental features (disabled by default)
+    experimentalFeatures: {
+      newUI: false,
+      betaAPI: false,
+    },
+  },
+}

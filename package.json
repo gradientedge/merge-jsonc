@@ -1,7 +1,7 @@
 {
   "name": "@gradientedge/merge-jsonc",
   "version": "0.1.0",
-  "description": "JSON/JSONC deep-merger CLI for Node 22+",
+  "description": "JSON/JSONC/JSON5 deep-merger CLI for Node 22+",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -30,11 +30,13 @@
   },
   "dependencies": {
     "deepmerge": "^4.3.1",
+    "json5": "^2.2.3",
     "jsonc-parser": "^3.3.1",
     "yargs": "^18.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
+    "@types/json5": "^0.0.30",
     "@types/node": "^22.7.5",
     "@types/yargs": "^17.0.33",
     "@typescript-eslint/eslint-plugin": "^8.45.0",

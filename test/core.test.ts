@@ -237,4 +237,83 @@ describe("mergeJsonc core functionality", () => {
     const merged = JSON.parse(readTestFile("merged.jsonc"));
     expect(merged.items).toEqual([1, 2, 3, 4]);
   });
+
+  describe("JSON5 support", () => {
+    test("should parse JSON5 files with comments and unquoted keys", () => {
+      writeTestFile(
+        "base.json5",
+        `{
+        // This is a comment
+        name: "test-app",
+        version: "1.0.0",
+        features: {
+          auth: true, // trailing comma
+        },
+      }`
+      );
+
+      const result = mergeJsonc({
+        inputs: [join(TEST_DIR, "base.json5")],
+        out: join(TEST_DIR, "output.json"),
+      });
+
+      expect(result.wrote).toBe(true);
+
+      const merged = JSON.parse(readTestFile("output.json"));
+      expect(merged.name).toBe("test-app");
+      expect(merged.version).toBe("1.0.0");
+      expect(merged.features.auth).toBe(true);
+    });
+
+    test("should merge JSON5 with other formats", () => {
+      writeTestFile(
+        "base.json5",
+        `{
+        name: "app",
+        config: {
+          debug: true,
+        }
+      }`
+      );
+
+      writeTestFile(
+        "override.jsonc",
+        `{
+        // JSONC comment
+        "config": {
+          "production": false
+        }
+      }`
+      );
+
+      const result = mergeJsonc({
+        inputs: [join(TEST_DIR, "base.json5"), join(TEST_DIR, "override.jsonc")],
+        out: join(TEST_DIR, "mixed.json"),
+      });
+
+      expect(result.wrote).toBe(true);
+
+      const merged = JSON.parse(readTestFile("mixed.json"));
+      expect(merged.name).toBe("app");
+      expect(merged.config.debug).toBe(true);
+      expect(merged.config.production).toBe(false);
+    });
+
+    test("should output to JSON5 format when specified", () => {
+      writeTestFile("input.json", '{"test": true, "value": 42}');
+
+      const result = mergeJsonc({
+        inputs: [join(TEST_DIR, "input.json")],
+        out: join(TEST_DIR, "output.json5"),
+      });
+
+      expect(result.wrote).toBe(true);
+
+      // Should be valid JSON5 (which is also valid JSON in this case)
+      const content = readTestFile("output.json5");
+      const parsed = JSON.parse(content);
+      expect(parsed.test).toBe(true);
+      expect(parsed.value).toBe(42);
+    });
+  });
 });

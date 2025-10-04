@@ -51,11 +51,11 @@ async function run() {
   try {
     const argv = await yargs(hideBin(process.argv))
       .usage(
-        "merge-jsonc (Node 22+, ESM)\n\nMerges JSON/JSONC files left→right (later files override earlier),\nwrites to --out, and skips writing when nothing changed."
+        "merge-jsonc (Node 22+, ESM)\n\nMerges JSON/JSONC/JSON5 files left→right (later files override earlier),\nwrites to --out, and skips writing when nothing changed."
       )
       .option("out", {
         alias: "o",
-        describe: "Output .json/.jsonc file path",
+        describe: "Output .json/.jsonc/.json5 file path",
         type: "string",
         default: "combined.jsonc",
       })
@@ -93,6 +93,10 @@ async function run() {
         "Merge base.jsonc and dev.jsonc into config.json"
       )
       .example("merge-jsonc --dry-run *.jsonc", "Preview merge of all .jsonc files")
+      .example(
+        "merge-jsonc --out config.json5 base.json5 local.json5",
+        "Merge JSON5 files with comments"
+      )
       .example(
         "merge-jsonc --backup --out prod.json stage.json prod-overrides.json",
         "Merge with backup"

@@ -1,0 +1,38 @@
+{
+  // Development environment overrides
+  server: {
+    port: 3000, // Different port for dev
+    host: "0.0.0.0", // Allow external connections
+    ssl: false,
+    // Development-specific settings
+    hot: true,
+    watch: true,
+  },
+
+  database: {
+    host: "dev-database.local",
+    name: "myapp_dev",
+    // Enable query logging in development
+    logging: true,
+    pool: {
+      max: 5, // Smaller pool for dev
+    },
+  },
+
+  features: {
+    analytics: true, // Enable for testing
+    // Enable experimental features in dev
+    experimentalFeatures: {
+      newUI: true,
+      betaAPI: true,
+      debugPanel: true, // Dev-only feature
+    },
+  },
+
+  // Development tools
+  devTools: {
+    enabled: true,
+    profiler: true,
+    debugger: true,
+  },
+}

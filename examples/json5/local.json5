@@ -1,0 +1,29 @@
+{
+  // Local developer overrides (gitignored)
+  server: {
+    port: 4000, // Personal preference port
+  },
+
+  database: {
+    // Use local Docker container
+    host: "localhost",
+    port: 5433, // Non-standard port
+    // Personal DB for testing
+    name: "myapp_local_test",
+  },
+
+  features: {
+    // Personal feature testing
+    experimentalFeatures: {
+      newUI: false, // Prefer old UI for now
+      personalFeature: true, // Custom local feature
+    },
+  },
+
+  // Local development preferences
+  preferences: {
+    theme: "dark",
+    verbose: true,
+    autoReload: true,
+  },
+}

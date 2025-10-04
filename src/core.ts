@@ -1,4 +1,5 @@
-import { parse } from "jsonc-parser";
+import { parse as parseJsonc } from "jsonc-parser";
+import JSON5 from "json5";
 import deepmerge from "deepmerge";
 import { existsSync } from "node:fs";
 import { safeInputPath, safeOutputPath, getMtimeMs, atomicWrite, readText } from "./fs-safety.js";
@@ -42,17 +43,31 @@ function checkIfUpToDate(outAbs: string, inputAbs: string[], dryRun: boolean): b
   return newestSrc <= outM;
 }
 
+function parseJsonFile(filePath: string, content: string): Record<string, unknown> {
+  const ext = filePath.toLowerCase().split(".").pop();
+
+  try {
+    if (ext === "json5") {
+      return JSON5.parse(content);
+    } else {
+      // Default to JSONC parser for .json, .jsonc, and other extensions
+      return parseJsonc(content);
+    }
+  } catch (error) {
+    const fileType = ext === "json5" ? "JSON5" : "JSON/JSONC";
+    throw new Error(
+      `Failed to parse ${fileType} file '${filePath}': ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
+
 function mergeFiles(inputAbs: string[]): Record<string, unknown> {
   let combined: Record<string, unknown> = {};
 
   for (const abs of inputAbs) {
-    try {
-      combined = deepmerge(combined, parse(readText(abs)));
-    } catch (error) {
-      throw new Error(
-        `Failed to parse JSONC file '${abs}': ${error instanceof Error ? error.message : String(error)}`
-      );
-    }
+    const content = readText(abs);
+    const parsed = parseJsonFile(abs, content);
+    combined = deepmerge(combined, parsed);
   }
 
   return combined;
