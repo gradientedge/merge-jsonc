@@ -108,16 +108,16 @@ export function mergeJsonc(opts: MergeOptions): MergeResult {
 
   const outAbs = safeOutputPath(out);
 
-  if (checkIfUpToDate(outAbs, inputAbs, dryRun)) {
-    return { wrote: false, reason: "up_to_date" };
-  }
-
   const combined = mergeFiles(inputAbs);
   const spaces = calculateIndentation(indent, pretty);
   const text = JSON.stringify(combined, null, spaces);
 
   if (!checkContentChanged(outAbs, text)) {
     return { wrote: false, reason: "no_content_change" };
+  }
+
+  if (checkIfUpToDate(outAbs, inputAbs, dryRun)) {
+    return { wrote: false, reason: "up_to_date" };
   }
 
   if (dryRun) {
