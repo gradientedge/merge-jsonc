@@ -12,6 +12,7 @@ export interface MergeOptions {
   dryRun?: boolean; // preview changes without writing
   backup?: boolean; // create .bak file before overwriting
   indent?: number; // custom indentation (overrides pretty)
+  arrayMerge?: "replace" | "concat"; // array merge strategy (default: replace)
 }
 
 export type MergeResult =
@@ -73,13 +74,23 @@ function parseJsonFile(filePath: string, content: string): Record<string, unknow
   }
 }
 
-function mergeFiles(inputAbs: string[]): Record<string, unknown> {
+function mergeFiles(
+  inputAbs: string[],
+  arrayMerge: "replace" | "concat" = "replace"
+): Record<string, unknown> {
   let combined: Record<string, unknown> = {};
+
+  const mergeOptions =
+    arrayMerge === "replace"
+      ? {
+          arrayMerge: (target: unknown[], source: unknown[]) => source,
+        }
+      : undefined;
 
   for (const abs of inputAbs) {
     const content = readText(abs);
     const parsed = parseJsonFile(abs, content);
-    combined = deepmerge<Record<string, unknown>>(combined, parsed);
+    combined = deepmerge<Record<string, unknown>>(combined, parsed, mergeOptions);
   }
 
   return combined;
@@ -110,6 +121,7 @@ export function mergeJsonc(opts: MergeOptions): MergeResult {
     dryRun = false,
     backup = false,
     indent,
+    arrayMerge = "replace",
   } = opts;
 
   const inputAbs = resolveInputPaths(inputs, skipMissing);
@@ -120,7 +132,7 @@ export function mergeJsonc(opts: MergeOptions): MergeResult {
 
   const outAbs = safeOutputPath(out);
 
-  const combined = mergeFiles(inputAbs);
+  const combined = mergeFiles(inputAbs, arrayMerge);
   const spaces = calculateIndentation(indent, pretty);
   const text = JSON.stringify(combined, null, spaces);
 

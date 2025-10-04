@@ -9,6 +9,7 @@ export interface ConfigOptions {
   dryRun?: boolean;
   backup?: boolean;
   indent?: number;
+  arrayMerge?: "replace" | "concat";
 }
 
 type ConfigKey = keyof ConfigOptions;
@@ -49,6 +50,12 @@ const validators: { [K in ConfigKey]-?: ConfigValidator<K> } = {
   indent: (value, source) => {
     if (typeof value !== "number" || !Number.isFinite(value)) {
       throw new Error(`Invalid 'indent' value in '${source}'. Expected finite number.`);
+    }
+    return value;
+  },
+  arrayMerge: (value, source) => {
+    if (value !== "replace" && value !== "concat") {
+      throw new Error(`Invalid 'arrayMerge' value in '${source}'. Expected 'replace' or 'concat'.`);
     }
     return value;
   },

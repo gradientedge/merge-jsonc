@@ -14,6 +14,7 @@ interface ParsedArgs {
   dryRun?: boolean;
   backup?: boolean;
   indent?: number;
+  arrayMerge?: "replace" | "concat";
   inputs: string[];
 }
 
@@ -48,6 +49,7 @@ function mergeArgsWithConfig(args: ParsedArgs, config: ConfigOptions): MergeOpti
     dryRun: args.dryRun ?? config.dryRun ?? false,
     backup: args.backup ?? config.backup ?? false,
     indent: args.indent ?? config.indent,
+    arrayMerge: args.arrayMerge ?? config.arrayMerge ?? "replace",
   };
 }
 
@@ -87,6 +89,12 @@ async function run() {
         describe: "Custom indentation spaces (overrides --min)",
         type: "number",
       })
+      .option("array-merge", {
+        describe: "Array merge strategy: 'replace' (default) or 'concat'",
+        type: "string",
+        choices: ["replace", "concat"],
+        default: "replace",
+      })
       .help("help")
       .alias("help", "h")
       .version(version)
@@ -124,6 +132,7 @@ async function run() {
       dryRun: argv["dry-run"],
       backup: argv.backup,
       indent: argv.indent,
+      arrayMerge: argv["array-merge"] as "replace" | "concat" | undefined,
       inputs: Array.from(argv._, (value) => String(value)),
     };
 

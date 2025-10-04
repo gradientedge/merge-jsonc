@@ -228,13 +228,29 @@ describe("mergeJsonc core functionality", () => {
     expect(content).toContain("\n");
   });
 
-  test("should merge arrays by concatenation (deepmerge default)", () => {
+  test("should replace arrays by default", () => {
     writeTestFile("a.jsonc", '{"items": [1, 2]}');
     writeTestFile("b.jsonc", '{"items": [3, 4]}');
 
     const result = mergeJsonc({
       inputs: [join(TEST_DIR, "a.jsonc"), join(TEST_DIR, "b.jsonc")],
       out: join(TEST_DIR, "merged.jsonc"),
+    });
+
+    expect(result.wrote).toBe(true);
+
+    const merged = readJsonObject("merged.jsonc");
+    expect(merged).toMatchObject({ items: [3, 4] });
+  });
+
+  test("should concatenate arrays when arrayMerge is 'concat'", () => {
+    writeTestFile("a.jsonc", '{"items": [1, 2]}');
+    writeTestFile("b.jsonc", '{"items": [3, 4]}');
+
+    const result = mergeJsonc({
+      inputs: [join(TEST_DIR, "a.jsonc"), join(TEST_DIR, "b.jsonc")],
+      out: join(TEST_DIR, "merged.jsonc"),
+      arrayMerge: "concat",
     });
 
     expect(result.wrote).toBe(true);

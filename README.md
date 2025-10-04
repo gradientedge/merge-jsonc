@@ -52,6 +52,7 @@ Options:
       --dry-run       Preview without writing files      [boolean] [default: false]
       --backup        Create .bak before overwriting     [boolean] [default: false]
       --indent        Custom indentation spaces          [number]
+      --array-merge   Array merge strategy               [choices: "replace", "concat"] [default: "replace"]
   -h, --help          Show help
   -v, --version       Show version
 ```
@@ -65,9 +66,69 @@ const result = mergeJsonc({
   inputs: ["base.json", "dev.jsonc", "local.json5"],
   out: "config.json",
   skipMissing: true,
+  arrayMerge: "replace", // or "concat"
 });
 
 console.log(result.wrote ? "Merged!" : result.reason);
+```
+
+---
+
+## 🔀 Array Merge Strategies
+
+By default, `merge-jsonc` **replaces** arrays when merging. You can configure this behavior:
+
+### Replace (default)
+
+Arrays from later files completely replace arrays from earlier files:
+
+```json
+// base.json
+{ "items": [1, 2, 3] }
+
+// override.json
+{ "items": [4, 5] }
+
+// Result with --array-merge replace (default)
+{ "items": [4, 5] }
+```
+
+```bash
+merge-jsonc base.json override.json --out result.json
+# or explicitly:
+merge-jsonc base.json override.json --out result.json --array-merge replace
+```
+
+### Concat
+
+Arrays are concatenated together:
+
+```json
+// base.json
+{ "items": [1, 2, 3] }
+
+// override.json
+{ "items": [4, 5] }
+
+// Result with --array-merge concat
+{ "items": [1, 2, 3, 4, 5] }
+```
+
+```bash
+merge-jsonc base.json override.json --out result.json --array-merge concat
+```
+
+### Configuration File
+
+You can also set the array merge strategy in your config file:
+
+```javascript
+// .merge-jsonc.config.mjs
+export default {
+  arrayMerge: "concat",
+  backup: true,
+  pretty: true,
+};
 ```
 
 ---
