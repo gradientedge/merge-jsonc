@@ -33,11 +33,6 @@ updates:
       # (can be reviewed manually when needed)
       - dependency-name: "@types/*"
         update-types: ["version-update:semver-major"]
-    # Auto-merge patch updates for development dependencies
-    auto-merge:
-      - match:
-          dependency-type: "development"
-          update-type: "semver:patch"
 
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"
