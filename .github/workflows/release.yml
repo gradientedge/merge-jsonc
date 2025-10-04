@@ -17,8 +17,8 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: npm ci
       - run: npm run lint
-      - run: npm test
       - run: npm run build
+      - run: npm test
 
   publish:
     if: github.ref == 'refs/heads/main'
