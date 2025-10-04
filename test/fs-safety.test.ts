@@ -29,35 +29,35 @@ describe("fs-safety utilities", () => {
 
   describe("validateSegments", () => {
     test("should allow valid path segments", () => {
-      expect(() => validateSegments("valid-file.json")).not.toThrow();
-      expect(() => validateSegments("folder/file.jsonc")).not.toThrow();
-      expect(() => validateSegments("a_b.c-d.json")).not.toThrow();
+      expect(() => { validateSegments("valid-file.json"); }).not.toThrow();
+      expect(() => { validateSegments("folder/file.jsonc"); }).not.toThrow();
+      expect(() => { validateSegments("a_b.c-d.json"); }).not.toThrow();
     });
 
     test("should reject invalid path segments", () => {
-      expect(() => validateSegments("file with spaces.json")).toThrow();
-      expect(() => validateSegments("file@with#special$.json")).toThrow();
-      expect(() => validateSegments("folder/file*.json")).toThrow();
+      expect(() => { validateSegments("file with spaces.json"); }).toThrow();
+      expect(() => { validateSegments("file@with#special$.json"); }).toThrow();
+      expect(() => { validateSegments("folder/file*.json"); }).toThrow();
     });
   });
 
   describe("ensureJsonLike", () => {
     test("should allow .json files", () => {
-      expect(() => ensureJsonLike("file.json")).not.toThrow();
+      expect(() => { ensureJsonLike("file.json"); }).not.toThrow();
     });
 
     test("should allow .jsonc files", () => {
-      expect(() => ensureJsonLike("file.jsonc")).not.toThrow();
+      expect(() => { ensureJsonLike("file.jsonc"); }).not.toThrow();
     });
 
     test("should allow .json5 files", () => {
-      expect(() => ensureJsonLike("file.json5")).not.toThrow();
+      expect(() => { ensureJsonLike("file.json5"); }).not.toThrow();
     });
 
     test("should reject other extensions", () => {
-      expect(() => ensureJsonLike("file.txt")).toThrow();
-      expect(() => ensureJsonLike("file.js")).toThrow();
-      expect(() => ensureJsonLike("file")).toThrow();
+      expect(() => { ensureJsonLike("file.txt"); }).toThrow();
+      expect(() => { ensureJsonLike("file.js"); }).toThrow();
+      expect(() => { ensureJsonLike("file"); }).toThrow();
     });
   });
 

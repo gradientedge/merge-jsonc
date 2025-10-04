@@ -43,18 +43,30 @@ function checkIfUpToDate(outAbs: string, inputAbs: string[], dryRun: boolean): b
   return newestSrc <= outM;
 }
 
+function assertJsonObject(
+  value: unknown,
+  filePath: string,
+  fileType: string
+): Record<string, unknown> {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(
+      `Expected ${fileType} file '${filePath}' to contain a JSON object at the top level.`
+    );
+  }
+  return value as Record<string, unknown>;
+}
+
 function parseJsonFile(filePath: string, content: string): Record<string, unknown> {
   const ext = filePath.toLowerCase().split(".").pop();
+  const fileType = ext === "json5" ? "JSON5" : "JSON/JSONC";
 
   try {
     if (ext === "json5") {
-      return JSON5.parse(content);
-    } else {
-      // Default to JSONC parser for .json, .jsonc, and other extensions
-      return parseJsonc(content);
+      return assertJsonObject(JSON5.parse(content), filePath, fileType);
     }
+
+    return assertJsonObject(parseJsonc(content), filePath, fileType);
   } catch (error) {
-    const fileType = ext === "json5" ? "JSON5" : "JSON/JSONC";
     throw new Error(
       `Failed to parse ${fileType} file '${filePath}': ${error instanceof Error ? error.message : String(error)}`
     );
@@ -67,7 +79,7 @@ function mergeFiles(inputAbs: string[]): Record<string, unknown> {
   for (const abs of inputAbs) {
     const content = readText(abs);
     const parsed = parseJsonFile(abs, content);
-    combined = deepmerge(combined, parsed);
+    combined = deepmerge<Record<string, unknown>>(combined, parsed);
   }
 
   return combined;

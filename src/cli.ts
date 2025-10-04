@@ -5,10 +5,10 @@ import { loadConfig, type ConfigOptions } from "./config.js";
 
 interface ParsedArgs {
   out?: string;
-  skipMissing: boolean;
-  pretty: boolean;
-  dryRun: boolean;
-  backup: boolean;
+  skipMissing?: boolean;
+  pretty?: boolean;
+  dryRun?: boolean;
+  backup?: boolean;
   indent?: number;
   inputs: string[];
 }
@@ -37,7 +37,7 @@ function formatOutputMessage(
 
 function mergeArgsWithConfig(args: ParsedArgs, config: ConfigOptions): MergeOptions {
   return {
-    out: args.out || config.out || "combined.jsonc",
+    out: args.out ?? config.out ?? "combined.jsonc",
     inputs: args.inputs,
     skipMissing: args.skipMissing ?? config.skipMissing ?? false,
     pretty: args.pretty ?? config.pretty ?? true,
@@ -102,13 +102,13 @@ async function run() {
         "Merge with backup"
       )
       .strict()
-      .fail((msg, err, yargs) => {
-        if (err) {
+      .fail((msg, err, yargsInstance) => {
+        if (err instanceof Error) {
           console.error("[merge-jsonc] Error:", err.message);
-        } else if (msg) {
+        } else if (typeof msg === "string" && msg.length > 0) {
           console.error("[merge-jsonc] Error:", msg);
         }
-        console.error(yargs.help());
+        console.error(yargsInstance.help());
         process.exit(1);
       })
       .parseAsync();
@@ -120,7 +120,7 @@ async function run() {
       dryRun: argv["dry-run"],
       backup: argv.backup,
       indent: argv.indent,
-      inputs: argv._ as string[],
+      inputs: Array.from(argv._, (value) => String(value)),
     };
 
     const config = await loadConfig();
@@ -138,4 +138,4 @@ async function run() {
   }
 }
 
-run();
+void run();

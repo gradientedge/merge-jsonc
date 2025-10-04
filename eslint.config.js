@@ -12,6 +12,7 @@ export default [
       parserOptions: {
         ecmaVersion: "latest",
         sourceType: "module",
+        project: "./tsconfig.json",
       },
       globals: {
         console: "readonly",
@@ -29,7 +30,7 @@ export default [
       "@typescript-eslint": typescript,
     },
     rules: {
-      ...typescript.configs.recommended.rules,
+      ...typescript.configs["strict-type-checked"].rules,
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/no-explicit-any": "warn",

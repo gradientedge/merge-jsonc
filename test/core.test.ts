@@ -27,6 +27,15 @@ describe("mergeJsonc core functionality", () => {
     return readFileSync(join(TEST_DIR, name), "utf8");
   };
 
+  const readJsonObject = (name: string): Record<string, unknown> => {
+    const text = readTestFile(name);
+    const parsed: unknown = JSON.parse(text);
+    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error(`Expected '${name}' to contain a JSON object.`);
+    }
+    return parsed as Record<string, unknown>;
+  };
+
   test("should merge simple objects", () => {
     writeTestFile("a.jsonc", '{"name": "test", "version": 1}');
     writeTestFile("b.jsonc", '{"version": 2, "author": "user"}');
@@ -39,7 +48,7 @@ describe("mergeJsonc core functionality", () => {
     expect(result.wrote).toBe(true);
     expect(result.reason).toBe("wrote");
 
-    const merged = JSON.parse(readTestFile("merged.jsonc"));
+    const merged = readJsonObject("merged.jsonc");
     expect(merged).toEqual({
       name: "test",
       version: 2,
@@ -75,16 +84,12 @@ describe("mergeJsonc core functionality", () => {
 
     expect(result.wrote).toBe(true);
 
-    const merged = JSON.parse(readTestFile("result.jsonc"));
-    expect(merged.config.database).toEqual({
-      host: "prod-db",
-      port: 5432,
-      ssl: true,
-    });
-    expect(merged.config.features).toEqual({
-      auth: true,
-      analytics: true,
-      experimental: true,
+    const merged = readJsonObject("result.jsonc");
+    expect(merged).toMatchObject({
+      config: {
+        database: { host: "prod-db", port: 5432, ssl: true },
+        features: { auth: true, analytics: true, experimental: true },
+      },
     });
   });
 
@@ -107,7 +112,7 @@ describe("mergeJsonc core functionality", () => {
 
     expect(result.wrote).toBe(true);
 
-    const merged = JSON.parse(readTestFile("no-comments.json"));
+    const merged = readJsonObject("no-comments.json");
     expect(merged).toEqual({
       name: "app",
       config: { debug: false },
@@ -125,7 +130,7 @@ describe("mergeJsonc core functionality", () => {
 
     expect(result.wrote).toBe(true);
 
-    const merged = JSON.parse(readTestFile("output.jsonc"));
+    const merged = readJsonObject("output.jsonc");
     expect(merged).toEqual({ value: 42 });
   });
 
@@ -174,7 +179,7 @@ describe("mergeJsonc core functionality", () => {
   test("should return no_content_change when merged content is identical", () => {
     const content = '{"value": 123}';
     writeTestFile("input.jsonc", content);
-    writeTestFile("output.jsonc", JSON.stringify(JSON.parse(content), null, 2));
+    writeTestFile("output.jsonc", JSON.stringify({ value: 123 }, null, 2));
 
     // Modify input timestamp to be newer
     const inputPath = join(TEST_DIR, "input.jsonc");
@@ -234,8 +239,8 @@ describe("mergeJsonc core functionality", () => {
 
     expect(result.wrote).toBe(true);
 
-    const merged = JSON.parse(readTestFile("merged.jsonc"));
-    expect(merged.items).toEqual([1, 2, 3, 4]);
+    const merged = readJsonObject("merged.jsonc");
+    expect(merged).toMatchObject({ items: [1, 2, 3, 4] });
   });
 
   describe("JSON5 support", () => {
@@ -259,10 +264,12 @@ describe("mergeJsonc core functionality", () => {
 
       expect(result.wrote).toBe(true);
 
-      const merged = JSON.parse(readTestFile("output.json"));
-      expect(merged.name).toBe("test-app");
-      expect(merged.version).toBe("1.0.0");
-      expect(merged.features.auth).toBe(true);
+      const merged = readJsonObject("output.json");
+      expect(merged).toMatchObject({
+        name: "test-app",
+        version: "1.0.0",
+        features: { auth: true },
+      });
     });
 
     test("should merge JSON5 with other formats", () => {
@@ -293,10 +300,11 @@ describe("mergeJsonc core functionality", () => {
 
       expect(result.wrote).toBe(true);
 
-      const merged = JSON.parse(readTestFile("mixed.json"));
-      expect(merged.name).toBe("app");
-      expect(merged.config.debug).toBe(true);
-      expect(merged.config.production).toBe(false);
+      const merged = readJsonObject("mixed.json");
+      expect(merged).toMatchObject({
+        name: "app",
+        config: { debug: true, production: false },
+      });
     });
 
     test("should output to JSON5 format when specified", () => {
@@ -310,10 +318,8 @@ describe("mergeJsonc core functionality", () => {
       expect(result.wrote).toBe(true);
 
       // Should be valid JSON5 (which is also valid JSON in this case)
-      const content = readTestFile("output.json5");
-      const parsed = JSON.parse(content);
-      expect(parsed.test).toBe(true);
-      expect(parsed.value).toBe(42);
+      const parsed = readJsonObject("output.json5");
+      expect(parsed).toMatchObject({ test: true, value: 42 });
     });
   });
 });

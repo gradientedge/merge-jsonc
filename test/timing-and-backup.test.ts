@@ -2,38 +2,44 @@ import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { existsSync, rmSync, mkdirSync, writeFileSync, readFileSync, utimesSync } from "node:fs";
 import { join } from "node:path";
 import { mergeJsonc } from "../src/core.js";
-import { spawn } from "node:child_process";
+import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 
 const TEST_DIR = join(process.cwd(), "test-tmp-timing");
 const CLI_PATH = join(process.cwd(), "dist/cli.js");
 
 // Helper to run CLI commands
 const runCli = (args: string[]): Promise<{ stdout: string; stderr: string; code: number }> => {
-  return new Promise((resolve) => {
-    const child = spawn("node", [CLI_PATH, ...args], {
+  return new Promise((resolve, reject) => {
+    const child: ChildProcessWithoutNullStreams = spawn("node", [CLI_PATH, ...args], {
       cwd: TEST_DIR,
       stdio: "pipe",
     });
 
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
+
     let stdout = "";
     let stderr = "";
 
-    child.stdout?.on("data", (data) => {
-      stdout += data.toString();
+    child.on("error", reject);
+    child.stdout.on("data", (chunk: string) => {
+      stdout += chunk;
     });
-
-    child.stderr?.on("data", (data) => {
-      stderr += data.toString();
+    child.stderr.on("data", (chunk: string) => {
+      stderr += chunk;
     });
 
     child.on("close", (code) => {
-      resolve({ stdout, stderr, code: code || 0 });
+      resolve({ stdout, stderr, code: code ?? 0 });
     });
   });
 };
 
 describe("Timing and backup functionality", () => {
   beforeEach(() => {
+    if (!existsSync(CLI_PATH)) {
+      throw new Error("CLI not built. Run 'npm run build' first.");
+    }
     if (existsSync(TEST_DIR)) {
       rmSync(TEST_DIR, { recursive: true });
     }
@@ -52,6 +58,15 @@ describe("Timing and backup functionality", () => {
 
   const readTestFile = (name: string) => {
     return readFileSync(join(TEST_DIR, name), "utf8");
+  };
+
+  const readJsonObject = (name: string): Record<string, unknown> => {
+    const text = readTestFile(name);
+    const parsed: unknown = JSON.parse(text);
+    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error(`Expected '${name}' to contain a JSON object.`);
+    }
+    return parsed as Record<string, unknown>;
   };
 
   const setFileTime = (filename: string, timeMs: number) => {
@@ -102,7 +117,7 @@ describe("Timing and backup functionality", () => {
       expect(result.wrote).toBe(true);
       expect(result.reason).toBe("wrote");
 
-      const content = JSON.parse(readTestFile("output.json"));
+      const content = readJsonObject("output.json");
       expect(content).toEqual({ new: "data" });
     });
 
@@ -274,7 +289,7 @@ describe("Timing and backup functionality", () => {
       expect(backupContent).toBe(originalContent);
 
       // Verify output has new content
-      const newContent = JSON.parse(readTestFile("output.json"));
+      const newContent = readJsonObject("output.json");
       expect(newContent).toEqual({ new: "content", added: true });
     });
 
@@ -332,7 +347,7 @@ describe("Timing and backup functionality", () => {
       setFileTime("input.jsonc", baseTime); // Now
 
       // Create output with identical content but older timestamp
-      writeTestFile("output.json", JSON.stringify(JSON.parse(content), null, 2));
+      writeTestFile("output.json", JSON.stringify({ same: "content" }, null, 2));
       setFileTime("output.json", baseTime - 1000); // 1 second ago
 
       const result = mergeJsonc({
@@ -378,8 +393,8 @@ describe("Timing and backup functionality", () => {
       expect(existsSync(backupPath)).toBe(false);
 
       // Verify original output is unchanged
-      const originalContent = readTestFile("output.json");
-      expect(JSON.parse(originalContent)).toEqual({ old: "data" });
+      const originalContent = readJsonObject("output.json");
+      expect(originalContent).toEqual({ old: "data" });
     });
   });
 
@@ -401,11 +416,11 @@ describe("Timing and backup functionality", () => {
       // Verify backup was created
       expect(existsSync(join(TEST_DIR, "existing.json.bak"))).toBe(true);
 
-      const backupContent = readTestFile("existing.json.bak");
-      expect(JSON.parse(backupContent)).toEqual({ original: "content" });
+      const backupContent = readJsonObject("existing.json.bak");
+      expect(backupContent).toEqual({ original: "content" });
 
-      const newContent = readTestFile("existing.json");
-      expect(JSON.parse(newContent)).toEqual({ new: "content" });
+      const newContent = readJsonObject("existing.json");
+      expect(newContent).toEqual({ new: "content" });
     });
 
     test("should report backup creation in CLI output", async () => {
@@ -457,7 +472,7 @@ describe("Timing and backup functionality", () => {
       expect(existsSync(join(TEST_DIR, "multi.json.bak"))).toBe(true);
 
       // Verify first backup
-      let backup = JSON.parse(readTestFile("multi.json.bak"));
+      let backup = readJsonObject("multi.json.bak");
       expect(backup).toEqual({ step: 0 });
 
       // Second merge (should overwrite backup)
@@ -469,11 +484,11 @@ describe("Timing and backup functionality", () => {
       expect(result.code).toBe(0);
 
       // Verify backup now contains result of first merge
-      backup = JSON.parse(readTestFile("multi.json.bak"));
+      backup = readJsonObject("multi.json.bak");
       expect(backup).toEqual({ step: 1, data: "first" });
 
       // Verify current output has second merge
-      const current = JSON.parse(readTestFile("multi.json"));
+      const current = readJsonObject("multi.json");
       expect(current).toEqual({ step: 2, data: "second" });
     });
   });
@@ -486,8 +501,9 @@ describe("Timing and backup functionality", () => {
 
       // Perform rapid operations
       const promises = Array.from({ length: 5 }, (_, i) => {
-        writeTestFile(`input-${i}.jsonc`, `{"counter": ${i + 1}}`);
-        return runCli(["--out", "base.json", "--backup", `input-${i}.jsonc`]);
+        const inputName = `input-${String(i)}.jsonc`;
+        writeTestFile(inputName, JSON.stringify({ counter: i + 1 }));
+        return runCli(["--out", "base.json", "--backup", inputName]);
       });
 
       const results = await Promise.all(promises);
@@ -541,7 +557,7 @@ describe("Timing and backup functionality", () => {
 
       // Verify backup exists and is correct
       expect(existsSync(join(TEST_DIR, "output.json.bak"))).toBe(true);
-      const backup = JSON.parse(readTestFile("output.json.bak"));
+      const backup = readJsonObject("output.json.bak");
       expect(backup).toEqual({ original: "data" });
     });
   });

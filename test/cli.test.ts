@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
-import { spawn } from "node:child_process";
+import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync, rmSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -8,31 +8,43 @@ const CLI_PATH = join(process.cwd(), "dist/cli.js");
 
 // Helper to run CLI commands
 const runCli = (args: string[]): Promise<{ stdout: string; stderr: string; code: number }> => {
-  return new Promise((resolve) => {
-    const child = spawn("node", [CLI_PATH, ...args], {
+  return new Promise((resolve, reject) => {
+    const child: ChildProcessWithoutNullStreams = spawn("node", [CLI_PATH, ...args], {
       cwd: TEST_DIR,
       stdio: "pipe",
     });
 
+    const { stdout: stdoutStream, stderr: stderrStream } = child;
+
+    stdoutStream.setEncoding("utf8");
+    stderrStream.setEncoding("utf8");
+
     let stdout = "";
     let stderr = "";
 
-    child.stdout?.on("data", (data) => {
-      stdout += data.toString();
+    const appendStdout = (chunk: string) => {
+      stdout += chunk;
+    };
+
+    const appendStderr = (chunk: string) => {
+      stderr += chunk;
+    };
+
+    child.on("error", (error) => {
+      reject(error);
     });
 
-    child.stderr?.on("data", (data) => {
-      stderr += data.toString();
-    });
+    stdoutStream.on("data", appendStdout);
+    stderrStream.on("data", appendStderr);
 
     child.on("close", (code) => {
-      resolve({ stdout, stderr, code: code || 0 });
+      resolve({ stdout, stderr, code: code ?? 0 });
     });
   });
 };
 
 describe("CLI integration tests", () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     // Ensure the project is built
     if (!existsSync(CLI_PATH)) {
       throw new Error("CLI not built. Run 'npm run build' first.");
@@ -56,6 +68,15 @@ describe("CLI integration tests", () => {
 
   const readTestFile = (name: string) => {
     return readFileSync(join(TEST_DIR, name), "utf8");
+  };
+
+  const readJsonFile = (name: string): Record<string, unknown> => {
+    const text = readTestFile(name);
+    const parsed: unknown = JSON.parse(text);
+    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error(`Expected '${name}' to contain a JSON object.`);
+    }
+    return parsed as Record<string, unknown>;
   };
 
   test("should show help with --help", async () => {
@@ -85,7 +106,7 @@ describe("CLI integration tests", () => {
     expect(result.code).toBe(0);
     expect(result.stdout).toContain("Wrote merged.jsonc");
 
-    const merged = JSON.parse(readTestFile("merged.jsonc"));
+    const merged = readJsonFile("merged.jsonc");
     expect(merged).toEqual({
       name: "test",
       version: 2,
@@ -118,7 +139,7 @@ describe("CLI integration tests", () => {
     expect(result.code).toBe(0);
     expect(result.stdout).toContain("Wrote output.jsonc");
 
-    const merged = JSON.parse(readTestFile("output.jsonc"));
+    const merged = readJsonFile("output.jsonc");
     expect(merged).toEqual({ value: 42 });
   });
 

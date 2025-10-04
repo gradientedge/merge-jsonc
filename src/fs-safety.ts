@@ -86,8 +86,10 @@ const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB limit
 export function readText(absPath: string) {
   const stats = statSync(absPath);
   if (stats.size > MAX_FILE_SIZE) {
+    const currentSizeMb = (stats.size / 1024 / 1024).toFixed(2);
+    const maxSizeMb = (MAX_FILE_SIZE / 1024 / 1024).toFixed(2);
     throw new Error(
-      `File '${absPath}' is too large (${Math.round(stats.size / 1024 / 1024)}MB). Maximum allowed size is ${MAX_FILE_SIZE / 1024 / 1024}MB.`
+      `File '${absPath}' is too large (${currentSizeMb}MB). Maximum allowed size is ${maxSizeMb}MB.`
     );
   }
   return readFileSync(absPath, "utf8");
