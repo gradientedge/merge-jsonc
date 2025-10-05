@@ -1,6 +1,6 @@
 {
   "name": "@gradientedge/merge-jsonc",
-  "version": "0.1.0",
+  "version": "0.0.0-development",
   "description": "JSON/JSONC/JSON5 deep-merger CLI for Node 22+",
   "license": "MIT",
   "author": "Gradient Edge",
