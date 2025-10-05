@@ -105,7 +105,7 @@ describe("CLI integration tests", () => {
 
     expect(result.code).toBe(0);
     // Accept versions like '1.2.3', '1.2.3-alpha.1', or '1.2.3+build.123'
-    expect(result.stdout.trim()).toMatch(/^[A-Za-z0-9.+-]+(?:\.[A-Za-z0-9.+-]+)+$/);
+    expect(result.stdout.trim()).toMatch(/^[A-Za-z0-9+-]+(?:\.[A-Za-z0-9+-]+)+$/);
   });
 
   test("should merge files successfully", async () => {
