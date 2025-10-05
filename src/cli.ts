@@ -15,6 +15,7 @@ interface ParsedArgs {
   backup?: boolean;
   indent?: number;
   arrayMerge?: "replace" | "concat";
+  header?: boolean;
   inputs: string[];
 }
 
@@ -50,6 +51,9 @@ function mergeArgsWithConfig(args: ParsedArgs, config: ConfigOptions): MergeOpti
     backup: args.backup ?? config.backup ?? false,
     indent: args.indent ?? config.indent,
     arrayMerge: args.arrayMerge ?? config.arrayMerge ?? "replace",
+    // header default true
+    // allow CLI to explicitly set header: false via --no-header
+    header: args.header ?? config.header ?? true,
   };
 }
 
@@ -95,6 +99,16 @@ async function run() {
         choices: ["replace", "concat"],
         default: "replace",
       })
+      .option("header", {
+        describe: "Prepend a comment header to JSONC/JSON5 outputs (default: true)",
+        type: "boolean",
+        default: true,
+      })
+      .option("no-header", {
+        describe: "Alias: do not prepend a comment header to JSONC/JSON5 outputs",
+        type: "boolean",
+        default: false,
+      })
       .help("help")
       .alias("help", "h")
       .version(version)
@@ -125,6 +139,16 @@ async function run() {
       })
       .parseAsync();
 
+    // normalize header arg: prefer explicit --header, else respect --no-header negation
+    let headerArg: boolean | undefined;
+    if (typeof argv.header === "boolean") {
+      headerArg = argv.header;
+    } else if (argv["no-header"]) {
+      headerArg = false;
+    } else {
+      headerArg = undefined;
+    }
+
     const args: ParsedArgs = {
       out: argv.out,
       skipMissing: argv["skip-missing"],
@@ -133,6 +157,9 @@ async function run() {
       backup: argv.backup,
       indent: argv.indent,
       arrayMerge: argv["array-merge"] as "replace" | "concat" | undefined,
+      // yargs presents boolean negations as the positive name being false
+      // yargs supports both --header and --no-header; prefer explicit argv.header when present
+      header: headerArg,
       inputs: Array.from(argv._, (value) => String(value)),
     };
 

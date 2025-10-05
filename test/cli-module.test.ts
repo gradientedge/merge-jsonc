@@ -72,6 +72,7 @@ describe("CLI module", () => {
       backup: true,
       indent: 4,
       arrayMerge: "replace",
+      header: true,
     });
     expect(logSpy).toHaveBeenCalledWith(
       expect.stringContaining("DRY RUN - would write to result.json")

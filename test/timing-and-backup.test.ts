@@ -2,6 +2,7 @@ import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { existsSync, rmSync, mkdirSync, writeFileSync, readFileSync, utimesSync } from "node:fs";
 import { join } from "node:path";
 import { mergeJsonc } from "../src/core.js";
+import JSON5 from "json5";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 
 const TEST_DIR = join(process.cwd(), "test-tmp-timing");
@@ -62,7 +63,15 @@ describe("Timing and backup functionality", () => {
 
   const readJsonObject = (name: string): Record<string, unknown> => {
     const text = readTestFile(name);
-    const parsed: unknown = JSON.parse(text);
+    const lines = text.split(/\r?\n/);
+    let first = 0;
+    while (first < lines.length) {
+      const ln = lines[first];
+      if (typeof ln !== "string" || !/^\s*(\/\/|#)/.test(ln)) break;
+      first++;
+    }
+    const payload = lines.slice(first).join("\n");
+    const parsed: unknown = JSON5.parse(payload);
     if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
       throw new Error(`Expected '${name}' to contain a JSON object.`);
     }

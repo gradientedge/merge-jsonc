@@ -2,6 +2,7 @@ import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { existsSync, rmSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { mergeJsonc } from "../src/core.js";
+import JSON5 from "json5";
 
 const TEST_DIR = join(process.cwd(), "test-tmp");
 
@@ -29,7 +30,16 @@ describe("mergeJsonc core functionality", () => {
 
   const readJsonObject = (name: string): Record<string, unknown> => {
     const text = readTestFile(name);
-    const parsed: unknown = JSON.parse(text);
+    // Strip leading comment header lines (// or #) that may be prepended for JSONC/JSON5 outputs
+    const lines = text.split(/\r?\n/);
+    let first = 0;
+    while (first < lines.length) {
+      const ln = lines[first];
+      if (typeof ln !== "string" || !/^\s*(\/\/|#)/.test(ln)) break;
+      first++;
+    }
+    const payload = lines.slice(first).join("\n");
+    const parsed: unknown = JSON5.parse(payload);
     if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
       throw new Error(`Expected '${name}' to contain a JSON object.`);
     }

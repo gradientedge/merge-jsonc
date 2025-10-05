@@ -10,6 +10,7 @@ export interface ConfigOptions {
   backup?: boolean;
   indent?: number;
   arrayMerge?: "replace" | "concat";
+  header?: boolean;
 }
 
 type ConfigKey = keyof ConfigOptions;
@@ -56,6 +57,12 @@ const validators: { [K in ConfigKey]-?: ConfigValidator<K> } = {
   arrayMerge: (value, source) => {
     if (value !== "replace" && value !== "concat") {
       throw new Error(`Invalid 'arrayMerge' value in '${source}'. Expected 'replace' or 'concat'.`);
+    }
+    return value;
+  },
+  header: (value, source) => {
+    if (typeof value !== "boolean") {
+      throw new Error(`Invalid 'header' value in '${source}'. Expected boolean.`);
     }
     return value;
   },
