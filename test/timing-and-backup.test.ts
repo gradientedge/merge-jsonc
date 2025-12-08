@@ -6,7 +6,7 @@ import JSON5 from "json5";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 
 const TEST_DIR = join(process.cwd(), "test-tmp-timing");
-const CLI_PATH = join(process.cwd(), "dist/cli.js");
+const CLI_PATH = join(process.cwd(), "dist/cli.mjs");
 
 // Helper to run CLI commands
 const runCli = (args: string[]): Promise<{ stdout: string; stderr: string; code: number }> => {
