@@ -152,7 +152,7 @@ export function mergeJsonc(opts: MergeOptions): MergeResult {
     finalText = header + text;
   }
 
-  if (!checkContentChanged(outAbs, text)) {
+  if (!checkContentChanged(outAbs, finalText)) {
     return { wrote: false, reason: "no_content_change" };
   }
 
@@ -161,7 +161,7 @@ export function mergeJsonc(opts: MergeOptions): MergeResult {
   }
 
   if (dryRun) {
-    return { wrote: false, reason: "dry_run", preview: text };
+    return { wrote: false, reason: "dry_run", preview: finalText };
   }
 
   const backupPath = atomicWrite(outAbs, finalText, backup);

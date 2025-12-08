@@ -164,7 +164,7 @@ describe("CLI integration tests", () => {
     const result = await runCli(["--out", "output.jsonc", "input.jsonc"]);
 
     expect(result.code).toBe(0);
-    expect(result.stdout).toContain("Up-to-date");
+    expect(result.stdout).toContain("Skipped");
   });
 
   test("should use default output filename when --out not specified", async () => {

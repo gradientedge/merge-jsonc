@@ -2,7 +2,7 @@
 
 ## What this project is
 
-- `merge-jsonc`: CLI + library to deep-merge JSON/JSONC/JSON5 files (later inputs override earlier), safe file I/O, array merge strategies (`replace` default, `concat` optional), adds header comments on JSONC/JSON5 outputs.
+- `merge-jsonc`: CLI + library to deep-merge JSON/JSONC/JSON5 files (later inputs override earlier), safe file I/O, array merge strategies (`replace` default, `concat` optional), adds header comments on JSONC/JSON5 outputs, auto-creates output directories, supports quiet mode (`-q`/`--quiet`) for scripting.
 - ESM-only, Node 22+ target. Build artifacts are `.mjs` in `dist/`.
 
 ## Tech stack
@@ -34,8 +34,10 @@
 - Preserve bin/exports in `package.json` pointing to `.mjs`.
 - Avoid adding `prepublishOnly` steps beyond build (keeps semantic-release happy).
 - Tests and CLI rely on `dist/cli.mjs`; ensure builds before running integration tests.
-- Header comments added for JSONC/JSON5 outputs—tests strip them; don’t remove unless intentional.
+- Header comments added for JSONC/JSON5 outputs—tests strip them; don't remove unless intentional.
 - Default array merge is `replace`; `--array-merge concat` supported; keep behavior documented.
+- Output directories are auto-created with `mkdir -p` semantics; no need to pre-create paths.
+- `--quiet` flag suppresses non-error output for script-friendly operation; errors still shown for debugging.
 - Maintain ASCII in files unless existing content requires otherwise.
 
 ## When changing deps

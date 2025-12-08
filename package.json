@@ -78,7 +78,10 @@
   "files": ["dist"],
   "sideEffects": false,
   "lint-staged": {
-    "**/*.{ts,tsx,js,jsx,mjs,cjs,cts,mts}": ["prettier --write", "eslint --fix --max-warnings=0"],
+    "src/**/*.{ts,tsx}": ["prettier --write", "eslint --fix --max-warnings=0"],
+    "test/**/*.{ts,tsx}": ["prettier --write", "eslint --fix --max-warnings=0"],
+    "*.config.{js,ts}": ["prettier --write"],
+    "*.{js,cjs}": ["prettier --write"],
     "**/*.{json,jsonc,md,mdx,yml,yaml}": "prettier --write"
   }
 }

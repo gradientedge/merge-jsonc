@@ -6,6 +6,33 @@ import JSON5 from "json5";
 
 const TEST_DIR = join(process.cwd(), "test-tmp");
 
+// Shared test helpers
+const writeTestFile = (name: string, content: string) => {
+  writeFileSync(join(TEST_DIR, name), content);
+};
+
+const readTestFile = (name: string) => {
+  return readFileSync(join(TEST_DIR, name), "utf8");
+};
+
+const readJsonObject = (name: string): Record<string, unknown> => {
+  const text = readTestFile(name);
+  // Strip leading comment header lines (// or #) that may be prepended for JSONC/JSON5 outputs
+  const lines = text.split(/\r?\n/);
+  let first = 0;
+  while (first < lines.length) {
+    const ln = lines[first];
+    if (typeof ln !== "string" || !/^\s*(\/\/|#)/.test(ln)) break;
+    first++;
+  }
+  const payload = lines.slice(first).join("\n");
+  const parsed: unknown = JSON5.parse(payload);
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error(`Expected '${name}' to contain a JSON object.`);
+  }
+  return parsed as Record<string, unknown>;
+};
+
 describe("mergeJsonc core functionality", () => {
   beforeEach(() => {
     if (existsSync(TEST_DIR)) {
@@ -19,32 +46,6 @@ describe("mergeJsonc core functionality", () => {
       rmSync(TEST_DIR, { recursive: true });
     }
   });
-
-  const writeTestFile = (name: string, content: string) => {
-    writeFileSync(join(TEST_DIR, name), content);
-  };
-
-  const readTestFile = (name: string) => {
-    return readFileSync(join(TEST_DIR, name), "utf8");
-  };
-
-  const readJsonObject = (name: string): Record<string, unknown> => {
-    const text = readTestFile(name);
-    // Strip leading comment header lines (// or #) that may be prepended for JSONC/JSON5 outputs
-    const lines = text.split(/\r?\n/);
-    let first = 0;
-    while (first < lines.length) {
-      const ln = lines[first];
-      if (typeof ln !== "string" || !/^\s*(\/\/|#)/.test(ln)) break;
-      first++;
-    }
-    const payload = lines.slice(first).join("\n");
-    const parsed: unknown = JSON5.parse(payload);
-    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
-      throw new Error(`Expected '${name}' to contain a JSON object.`);
-    }
-    return parsed as Record<string, unknown>;
-  };
 
   test("should merge simple objects", () => {
     writeTestFile("a.jsonc", '{"name": "test", "version": 1}');
@@ -201,6 +202,7 @@ describe("mergeJsonc core functionality", () => {
     const result = mergeJsonc({
       inputs: [inputPath],
       out: outputPath,
+      header: false, // Disable header to test pure content change detection
     });
 
     expect(result.wrote).toBe(false);
@@ -347,5 +349,35 @@ describe("mergeJsonc core functionality", () => {
       const parsed = readJsonObject("output.json5");
       expect(parsed).toMatchObject({ test: true, value: 42 });
     });
+  });
+});
+
+describe("File system operations", () => {
+  beforeEach(() => {
+    if (existsSync(TEST_DIR)) {
+      rmSync(TEST_DIR, { recursive: true });
+    }
+    mkdirSync(TEST_DIR, { recursive: true });
+  });
+
+  afterEach(() => {
+    if (existsSync(TEST_DIR)) {
+      rmSync(TEST_DIR, { recursive: true });
+    }
+  });
+
+  test("should create nested output directories when missing", () => {
+    writeTestFile("input.json", '{"test": true}');
+
+    const result = mergeJsonc({
+      inputs: [join(TEST_DIR, "input.json")],
+      out: join(TEST_DIR, "nested", "deep", "output.json"),
+    });
+
+    expect(result.wrote).toBe(true);
+    expect(existsSync(join(TEST_DIR, "nested", "deep", "output.json"))).toBe(true);
+
+    const parsed = readJsonObject(join("nested", "deep", "output.json"));
+    expect(parsed).toMatchObject({ test: true });
   });
 });

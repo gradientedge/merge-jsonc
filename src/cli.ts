@@ -16,26 +16,28 @@ interface ParsedArgs {
   indent?: number;
   arrayMerge?: "replace" | "concat";
   header?: boolean;
+  quiet?: boolean;
   inputs: string[];
 }
 
 function formatOutputMessage(
   result: { wrote: boolean; reason: string; preview?: string; backup?: string },
-  out: string
+  out: string,
+  inputCount: number
 ): string {
   if (result.reason === "dry_run" && result.preview) {
     return `[merge-jsonc] DRY RUN - would write to ${out}:\n${result.preview}`;
   }
 
   const msgs: Record<string, string> = {
-    no_inputs: "[merge-jsonc] No existing inputs (skipping).",
-    up_to_date: "[merge-jsonc] Up-to-date (no source changes).",
-    no_content_change: "[merge-jsonc] Up-to-date (no content changes).",
-    wrote: `[merge-jsonc] Wrote ${out}`,
+    no_inputs: `[merge-jsonc] Skipped: no existing input files found (use --skip-missing to allow this).`,
+    up_to_date: `[merge-jsonc] Skipped: output is newer than all ${inputCount} input file(s).`,
+    no_content_change: `[merge-jsonc] Skipped: merged content identical to existing output.`,
+    wrote: `[merge-jsonc] Wrote ${out} (merged ${inputCount} file(s))`,
     wrote_with_backup:
       result.wrote && result.backup
-        ? `[merge-jsonc] Wrote ${out} (backup: ${result.backup})`
-        : `[merge-jsonc] Wrote ${out}`,
+        ? `[merge-jsonc] Wrote ${out} (merged ${inputCount} file(s), backup: ${result.backup})`
+        : `[merge-jsonc] Wrote ${out} (merged ${inputCount} file(s))`,
   };
 
   return msgs[result.reason] || `[merge-jsonc] Unknown result: ${result.reason}`;
@@ -109,6 +111,12 @@ async function run() {
         type: "boolean",
         default: false,
       })
+      .option("quiet", {
+        alias: "q",
+        describe: "Suppress non-error output (useful for scripts)",
+        type: "boolean",
+        default: false,
+      })
       .help("help")
       .alias("help", "h")
       .version(version)
@@ -160,6 +168,7 @@ async function run() {
       // yargs presents boolean negations as the positive name being false
       // yargs supports both --header and --no-header; prefer explicit argv.header when present
       header: headerArg,
+      quiet: argv.quiet,
       inputs: Array.from(argv._, (value) => String(value)),
     };
 
@@ -167,7 +176,9 @@ async function run() {
     const mergeOptions = mergeArgsWithConfig(args, config);
 
     const result = mergeJsonc(mergeOptions);
-    console.log(formatOutputMessage(result, mergeOptions.out));
+    if (!args.quiet) {
+      console.log(formatOutputMessage(result, mergeOptions.out, mergeOptions.inputs.length));
+    }
   } catch (error) {
     if (error instanceof Error) {
       console.error("[merge-jsonc] Error:", error.message);

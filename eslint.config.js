@@ -34,6 +34,7 @@ export default [
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],
     },
   },
   prettier,
