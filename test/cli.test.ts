@@ -5,7 +5,7 @@ import { join } from "node:path";
 import JSON5 from "json5";
 
 const TEST_DIR = join(process.cwd(), "test-tmp-cli");
-const CLI_PATH = join(process.cwd(), "dist/cli.js");
+const CLI_PATH = join(process.cwd(), "dist/cli.mjs");
 
 // Helper to run CLI commands
 const runCli = (args: string[]): Promise<{ stdout: string; stderr: string; code: number }> => {
