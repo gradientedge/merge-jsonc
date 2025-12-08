@@ -34,10 +34,11 @@ export default [
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],
     },
   },
   prettier,
   {
-    ignores: ["dist/", "node_modules/", "*.config.js", "*.config.ts"],
+    ignores: ["dist/", "node_modules/", "eslint.config.js", "*.config.ts"],
   },
 ];

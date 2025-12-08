@@ -30,14 +30,14 @@ function formatOutputMessage(
   }
 
   const msgs: Record<string, string> = {
-    no_inputs: `[merge-jsonc] Skipped: all input files are missing (already using --skip-missing).`,
-    up_to_date: `[merge-jsonc] Skipped: output is newer than all ${String(inputCount)} input file(s).`,
+    no_inputs: `[merge-jsonc] Skipped: no existing input files found (use --skip-missing to allow this).`,
+    up_to_date: `[merge-jsonc] Skipped: output is newer than all ${inputCount} input file(s).`,
     no_content_change: `[merge-jsonc] Skipped: merged content identical to existing output.`,
-    wrote: `[merge-jsonc] Wrote ${out} (merged ${String(inputCount)} file(s))`,
+    wrote: `[merge-jsonc] Wrote ${out} (merged ${inputCount} file(s))`,
     wrote_with_backup:
       result.wrote && result.backup
-        ? `[merge-jsonc] Wrote ${out} (merged ${String(inputCount)} file(s), backup: ${result.backup})`
-        : `[merge-jsonc] Wrote ${out} (merged ${String(inputCount)} file(s))`,
+        ? `[merge-jsonc] Wrote ${out} (merged ${inputCount} file(s), backup: ${result.backup})`
+        : `[merge-jsonc] Wrote ${out} (merged ${inputCount} file(s))`,
   };
 
   return msgs[result.reason] || `[merge-jsonc] Unknown result: ${result.reason}`;
