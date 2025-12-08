@@ -349,19 +349,23 @@ describe("mergeJsonc core functionality", () => {
       expect(parsed).toMatchObject({ test: true, value: 42 });
     });
 
-    test("should create nested output directories when missing", () => {
-      writeTestFile("input.json", '{"test": true}');
+    // (moved to "File system operations" block below)
+  });
+});
 
-      const result = mergeJsonc({
-        inputs: [join(TEST_DIR, "input.json")],
-        out: join(TEST_DIR, "nested", "deep", "output.json"),
-      });
+describe("File system operations", () => {
+  test("should create nested output directories when missing", () => {
+    writeTestFile("input.json", '{"test": true}');
 
-      expect(result.wrote).toBe(true);
-      expect(existsSync(join(TEST_DIR, "nested", "deep", "output.json"))).toBe(true);
-
-      const parsed = readJsonObject(join("nested", "deep", "output.json"));
-      expect(parsed).toMatchObject({ test: true });
+    const result = mergeJsonc({
+      inputs: [join(TEST_DIR, "input.json")],
+      out: join(TEST_DIR, "nested", "deep", "output.json"),
     });
+
+    expect(result.wrote).toBe(true);
+    expect(existsSync(join(TEST_DIR, "nested", "deep", "output.json"))).toBe(true);
+
+    const parsed = readJsonObject(join("nested", "deep", "output.json"));
+    expect(parsed).toMatchObject({ test: true });
   });
 });
