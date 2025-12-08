@@ -460,7 +460,7 @@ describe("Timing and backup functionality", () => {
       const result = await runCli(["--out", "output.json", "--backup", "input.jsonc"]);
 
       expect(result.code).toBe(0);
-      expect(result.stdout).toContain("Up-to-date");
+      expect(result.stdout).toContain("Skipped");
       expect(result.stdout).not.toContain("backup:");
 
       // Verify no backup created

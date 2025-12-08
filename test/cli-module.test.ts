@@ -98,7 +98,7 @@ describe("CLI module", () => {
     expect(exitSpy).not.toHaveBeenCalled();
     expect(errorSpy).not.toHaveBeenCalled();
     expect(logSpy).toHaveBeenCalledWith(
-      "[merge-jsonc] Wrote combined.jsonc (backup: target.json.bak)"
+      "[merge-jsonc] Wrote combined.jsonc (merged 1 file(s), backup: target.json.bak)"
     );
   });
 
@@ -119,7 +119,7 @@ describe("CLI module", () => {
 
     expect(exitSpy).not.toHaveBeenCalled();
     expect(errorSpy).not.toHaveBeenCalled();
-    expect(logSpy).toHaveBeenCalledWith("[merge-jsonc] Wrote combined.jsonc");
+    expect(logSpy).toHaveBeenCalledWith("[merge-jsonc] Wrote combined.jsonc (merged 1 file(s))");
   });
 
   test("logs no-input message when merge skips all inputs", async () => {
@@ -129,7 +129,9 @@ describe("CLI module", () => {
 
     await import("../src/cli.js");
     await vi.waitFor(() => {
-      expect(logSpy).toHaveBeenCalledWith("[merge-jsonc] No existing inputs (skipping).");
+      expect(logSpy).toHaveBeenCalledWith(
+        "[merge-jsonc] Skipped: no existing input files found (use --skip-missing to allow this)."
+      );
     });
   });
 
@@ -140,7 +142,9 @@ describe("CLI module", () => {
 
     await import("../src/cli.js");
     await vi.waitFor(() => {
-      expect(logSpy).toHaveBeenCalledWith("[merge-jsonc] Up-to-date (no content changes).");
+      expect(logSpy).toHaveBeenCalledWith(
+        "[merge-jsonc] Skipped: merged content identical to existing output."
+      );
     });
   });
 
