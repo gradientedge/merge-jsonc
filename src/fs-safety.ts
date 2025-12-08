@@ -5,6 +5,7 @@ import {
   readFileSync,
   writeFileSync,
   renameSync,
+  mkdirSync,
 } from "node:fs";
 import { resolve, relative, extname, dirname, sep, posix } from "node:path";
 
@@ -72,6 +73,12 @@ export function atomicWrite(
     backupPath = `${outAbs}.bak`;
     const backupContent = readText(outAbs);
     writeFileSync(backupPath, backupContent);
+  }
+
+  // Ensure parent directory exists
+  const dir = dirname(outAbs);
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
   }
 
   const tmp = `${outAbs}.tmp`;
