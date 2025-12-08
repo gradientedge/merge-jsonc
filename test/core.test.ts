@@ -201,6 +201,7 @@ describe("mergeJsonc core functionality", () => {
     const result = mergeJsonc({
       inputs: [inputPath],
       out: outputPath,
+      header: false, // Disable header to test pure content change detection
     });
 
     expect(result.wrote).toBe(false);
