@@ -68,7 +68,6 @@
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
     "semantic-release": "^25.0.2",
     "tsdown": "^0.17.1",
@@ -76,9 +75,5 @@
     "vitest": "^4.0.15"
   },
   "files": ["dist"],
-  "sideEffects": false,
-  "lint-staged": {
-    "**/*.{ts,tsx,js,jsx,mjs,cjs,cts,mts}": ["prettier --write", "eslint --fix --max-warnings=0"],
-    "**/*.{json,jsonc,md,mdx,yml,yaml}": "prettier --write"
-  }
+  "sideEffects": false
 }
