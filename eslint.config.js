@@ -39,6 +39,6 @@ export default [
   },
   prettier,
   {
-    ignores: ["dist/", "node_modules/", "eslint.config.js", "*.config.ts"],
+    ignores: ["dist/", "node_modules/", "*.config.js", "*.config.ts"],
   },
 ];
