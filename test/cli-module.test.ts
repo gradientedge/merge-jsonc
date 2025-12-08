@@ -191,4 +191,64 @@ describe("CLI module", () => {
 
     expect(errorSpy).toHaveBeenCalled();
   });
+
+  test("suppresses output when --quiet flag is used", async () => {
+    process.argv = ["node", "merge-jsonc", "--quiet", "input.json"];
+
+    mergeJsoncMock.mockReturnValueOnce({ wrote: true, reason: "wrote", out: "output.json" });
+
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
+
+    await import("../src/cli.js");
+    await vi.waitFor(() => {
+      expect(mergeJsoncMock).toHaveBeenCalled();
+    });
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    expect(errorSpy).not.toHaveBeenCalled();
+    expect(logSpy).not.toHaveBeenCalled();
+  });
+
+  test("suppresses output with -q alias", async () => {
+    process.argv = ["node", "merge-jsonc", "-q", "input.json"];
+
+    mergeJsoncMock.mockReturnValueOnce({
+      wrote: false,
+      reason: "no_content_change",
+    });
+
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
+
+    await import("../src/cli.js");
+    await vi.waitFor(() => {
+      expect(mergeJsoncMock).toHaveBeenCalled();
+    });
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    expect(logSpy).not.toHaveBeenCalled();
+  });
+
+  test("still shows errors when --quiet is used", async () => {
+    process.argv = ["node", "merge-jsonc", "--quiet", "input.json"];
+
+    mergeJsoncMock.mockImplementationOnce(() => {
+      throw new Error("test error");
+    });
+
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
+
+    await import("../src/cli.js");
+    await vi.waitFor(() => {
+      expect(exitSpy).toHaveBeenCalled();
+    });
+
+    expect(errorSpy).toHaveBeenCalledWith("[merge-jsonc] Error:", "test error");
+    expect(logSpy).not.toHaveBeenCalled();
+    expect(exitSpy).toHaveBeenCalledWith(1);
+  });
 });
