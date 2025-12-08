@@ -14,6 +14,7 @@ It's designed for config layering (base → local → environment), with:
 - 🧠 **Incremental builds** — skips work when inputs or content haven't changed
 - 🔒 **Path-safe** — resists directory-traversal and symlink escapes (Snyk-friendly)
 - 🧾 **Multi-format aware** — parses JSON, JSONC (comments), and JSON5 (extended syntax)
+- 📁 **Auto-creates directories** — output paths with missing parent directories are created automatically
 - 🪶 **ESM-only, Node 22+** — zero legacy baggage
 
 ---
@@ -34,6 +35,9 @@ merge-jsonc --out final.json base.json dev.jsonc local.json5
 
 # With backup and preview
 merge-jsonc --backup --dry-run --out config.json *.jsonc
+
+# Quiet mode for scripts
+merge-jsonc -q --out config.json base.json override.json
 ```
 
 ---
@@ -51,6 +55,7 @@ Options:
       --min           Minified output                     [boolean] [default: false]
       --dry-run       Preview without writing files      [boolean] [default: false]
       --backup        Create .bak before overwriting     [boolean] [default: false]
+  -q, --quiet         Suppress non-error output          [boolean] [default: false]
       --indent        Custom indentation spaces          [number]
       --array-merge   Array merge strategy               [choices: "replace", "concat"] [default: "replace"]
   -h, --help          Show help
@@ -130,6 +135,24 @@ export default {
   pretty: true,
 };
 ```
+
+---
+
+## 🤫 Quiet Mode for Scripting
+
+Use `--quiet` (or `-q`) to suppress all non-error output, perfect for CI/CD pipelines and automated workflows:
+
+```bash
+# Silent operation - only errors are shown
+merge-jsonc -q --out config.json base.json override.json
+
+# Use in scripts with exit code checking
+if merge-jsonc -q --out config.json *.jsonc; then
+  echo "Config merged successfully"
+fi
+```
+
+Errors are still displayed even with `--quiet`, ensuring debugging information is available when needed.
 
 ---
 
